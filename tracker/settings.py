@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'admins',
     'users',
-    # 'projects',
+    'projects',
 ]
 
 MIDDLEWARE = [
@@ -143,19 +143,13 @@ CSRF_COOKIE_SECURE = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:5174',
-
 ]
 
-
-# Allow credentials (e.g., cookies) to be sent with the request
 CORS_ALLOW_CREDENTIALS = True
-
-
-
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
-    'PATCH',  # Make sure to include PATCH
+    'PATCH',
     'POST',
     'PUT',
 ]
