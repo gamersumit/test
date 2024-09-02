@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 class AdminCreateView(CreateAPIView):
     queryset = AdminService.get_all_admins()
     serializer_class = AdminCreateSerializer
-    # authentication_classes = []
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -30,6 +30,7 @@ class AdminLoginView(CreateAPIView):
     queryset = AdminService.get_all_admins()
     serializer_class = AdminSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         admin = AdminService.get_admin_by_email(request.data['email'])
@@ -43,6 +44,7 @@ class AdminGoogleOauthView(CreateAPIView):
     queryset = AdminService.get_all_admins()
     serializer_class = AdminSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         auth_code = request.data.get('code')
