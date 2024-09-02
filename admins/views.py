@@ -1,6 +1,6 @@
 from rest_framework.generics import ListCreateAPIView, CreateAPIView
 from . services import AdminService
-from . serializers import AdminCreateSerializer, AdminSerializer
+from . serializers import AdminCreateSerializer, AdminSerializer, GoogleSerializer
 from django.contrib.auth.hashers import make_password,check_password
 from . utils import *
 from . models import Admin
@@ -42,7 +42,7 @@ class AdminLoginView(CreateAPIView):
 
 class AdminGoogleOauthView(CreateAPIView):
     queryset = AdminService.get_all_admins()
-    serializer_class = AdminSerializer
+    serializer_class = GoogleSerializer
     permission_classes = [AllowAny]
     authentication_classes = []
 
