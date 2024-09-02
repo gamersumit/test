@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'admins',
     'users',
+    'projects',
 ]
 
 MIDDLEWARE = [
@@ -133,21 +134,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://app.staging.kwipo.com',
-    'https://app.support.dev.kwipo.com',
     'http://localhost:3000',
-    'https://app.dev.kwipo.com',
-    'https://app.support.staging.kwipo.com',
 ]
 
 CSRF_COOKIE_SECURE = True
 
 CORS_ALLOWED_ORIGINS = [
-    'https://app.staging.kwipo.com',
-    'https://app.support.dev.kwipo.com',
     'http://localhost:3000',
-    'https://app.dev.kwipo.com',
-    'https://app.support.staging.kwipo.com',
 ]
 
 
