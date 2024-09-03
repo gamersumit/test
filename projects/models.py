@@ -1,6 +1,7 @@
 from django.db import models
 from admins.models import User
 import uuid
+from cloudinary.models import CloudinaryField
 # Create your models here.
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -23,19 +24,19 @@ class Logs(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     description = models.TextField()
-    images = models.ManyToManyField('ScreenCaptures')
+    images = models.ManyToManyField('ScreenCaptures', related_name='logs')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.log
+        return f'Log {self.id}'
     
 class ScreenCaptures(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    log_id = models.ForeignKey(Logs, on_delete=models.CASCADE)
+    log_id = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name='screen_captures')
     image = models.ImageField(upload_to='images/')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.image
+        return f'ScreenCapture {self.id}'

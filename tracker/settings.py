@@ -31,9 +31,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
+    'rest_framework_simplejwt',
     'admins',
     'projects',
 ]
@@ -174,3 +176,12 @@ AUTHENTICATION_BACKENDS = [
     'tracker.authenticaters.AdminUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUD_NAME'),
+    'API_KEY': os.getenv('API_KEY'),
+    'API_SECRET': os.getenv('API_SECRET'),
+}
+
+MEDIA_URL = '/media/'  # or any prefix you choose
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

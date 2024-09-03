@@ -124,7 +124,7 @@ class UserListCreateView(ListCreateAPIView):
 class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = UserService.get_all_users()
     lookup_field = 'pk'
-    http_method_names = ['put', 'delete']
+    http_method_names = ['get','put', 'delete']
 
     def get_serializer_class(self): 
         if self.request.method == 'PUT':

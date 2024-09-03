@@ -2,8 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 from admins.utils import decode_access_token
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from .services import ProjectService
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
+from .services import *
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
@@ -63,21 +63,57 @@ class ProjectRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
             return super().delete(request, *args, **kwargs)
         return Response({'error': 'You are not authorized to delete this project'}, status=status.HTTP_400_BAD_REQUEST)
 
-# class ProjectLogsView(ListCreateAPIView):
-#     queryset = ProjectService.get_all_projects()
-    
-#     def get(self, request, *args, **kwargs):
+class ProjectLogsView(ListCreateAPIView):
+    queryset = ProjectService.get_all_projects()
+    serializer_class=LogCreateSerializer
 
-        
-#         serializer = LogSerializer(logs, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, *args, **kwargs):
+        project = ProjectService.get_project(request.query_params.get('project_id'))
+        logs = LogService.filter_logs_by_project_id(project.id)
+        serializer = LogSerializer(logs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
-#     def post(self, request, *args, **kwargs):
-#         project = ProjectService.get_project(kwargs['pk'])
-#         request.data['project_id'] = project.id
-#         serializer = LogCreateSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             log_data = LogSerializer(serializer.instance).data
-#             return Response(log_data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class ProjectLogsDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = LogService.get_all_logs()
+    lookup_field = 'pk'
+    http_method_names = ['put', 'delete']
+    
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return LogCreateSerializer
+        return LogSerializer
+
+class ProjectScreenCaptureView(CreateAPIView):
+    queryset = ScreenCaptureService.get_all_screen_captures()
+    serializer_class=ScreenCaptureCreateSerializer
+    
+    def post(self, request, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        user_id = decode_access_token(token).get('user_id')
+        log = LogService.get_log(request.data.get('log_id'))
+        if str(log.user_id.id) == str(user_id):
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                log.images.add(serializer.instance)
+                image_data = ScreenCaptureService.get_screen_capture(serializer.instance.id)
+                screen_capture_data = ScreenCaptureCreateSerializer(image_data).data
+                return Response(screen_capture_data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'You are not authorized to add screen capture to this log'}, status=status.HTTP_400_BAD_REQUEST)
+
+class ProjectScreenCaptureDetailView(DestroyAPIView):
+    queryset = ScreenCaptureService.get_all_screen_captures()
+    serializer_class=ScreenCaptureCreateSerializer
+
+    def delete(self, request, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        user_id = decode_access_token(token).get('user_id')
+        screen_capture = ScreenCaptureService.get_screen_capture(kwargs['pk'])
+        log = LogService.get_log(screen_capture.log_id.id)
+        if str(log.user_id.id) == str(user_id):
+            log.images.remove(screen_capture)
+            return super().delete(request, *args, **kwargs)
+        return Response({'error': 'You are not authorized to delete this screen capture'}, status=status.HTTP_400_BAD_REQUEST)

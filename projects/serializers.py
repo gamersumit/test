@@ -13,12 +13,19 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['id', 'name', 'description','users']
 
+class LogCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Logs
+        fields = ['id', 'project_id', 'user_id', 'date', 'start_time', 'end_time', 'description']
+
+
+class ScreenCaptureCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScreenCaptures
+        fields = ['id','log_id', 'image','created_at']
+        
 class LogSerializer(serializers.ModelSerializer):
+    images = ScreenCaptureCreateSerializer(many=True, read_only=True)
     class Meta:
         model = Logs
         fields = ['id', 'project_id', 'user_id', 'date', 'start_time', 'end_time', 'description', 'images']
-
-class ScreenCaptureSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ScreenCaptures
-        fields = ['id', 'log_id', 'image']
