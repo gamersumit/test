@@ -40,43 +40,50 @@ INSTALLED_APPS = [
     'projects',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://app.staging.kwipo.com',
-    'https://app.support.dev.kwipo.com',
-    'http://localhost:5173',
-    'https://tracker-poc-hazel.vercel.app',
-    'https://app.support.staging.kwipo.com',
-]
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS= True
 
-CSRF_COOKIE_SECURE = True
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://app.staging.kwipo.com',
+#     'https://app.support.dev.kwipo.com',
+#     'http://localhost:5173',
+#     'https://tracker-poc-hazel.vercel.app',
+#     'https://app.support.staging.kwipo.com',
+# ]
 
-CORS_ALLOWED_ORIGINS = [
-    'https://app.staging.kwipo.com',
-    'https://app.support.dev.kwipo.com',
-    'http://localhost:5173',
-    'https://tracker-poc-hazel.vercel.app',
-    'https://app.support.staging.kwipo.com',
-]
+# CSRF_COOKIE_SECURE = True
 
-
-# Allow credentials (e.g., cookies) to be sent with the request
-CORS_ALLOW_CREDENTIALS = True
-
+# CORS_ALLOWED_ORIGINS = [
+#     'https://app.staging.kwipo.com',
+#     'https://app.support.dev.kwipo.com',
+#     'http://localhost:5173',
+#     'https://tracker-poc-hazel.vercel.app',
+#     'https://app.support.staging.kwipo.com',
+# ]
 
 
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'PATCH',  # Make sure to include PATCH
-    'POST',
-    'PUT',
-    'OPTIONS',
-]
+# # Allow credentials (e.g., cookies) to be sent with the request
+# CORS_ALLOW_CREDENTIALS = True
+
+
+
+# CORS_ALLOW_METHODS = [
+#     'DELETE',
+#     'GET',
+#     'PATCH',  # Make sure to include PATCH
+#     'POST',
+#     'PUT',
+#     'OPTIONS',
+# ]
+
+# CORS_ORIGIN_ALLOW_ALL=True
+
+
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
