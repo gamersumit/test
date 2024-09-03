@@ -40,31 +40,8 @@ INSTALLED_APPS = [
     'projects',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True 
-
-
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'PATCH',
-    'POST',
-    'PUT',
-    'OPTIONS',
-]
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-]
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS= True
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Ensure this is first
