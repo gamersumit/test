@@ -52,9 +52,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -134,6 +134,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS= True
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://app.staging.kwipo.com',
+    'https://app.support.dev.kwipo.com',
+    'http://localhost:5173',
+    'https://app.dev.kwipo.com',
+    'https://app.support.staging.kwipo.com',
+]
+
+CSRF_COOKIE_SECURE = True
+
+CORS_ALLOWED_ORIGINS = [
+    'https://app.staging.kwipo.com',
+    'https://app.support.dev.kwipo.com',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://app.dev.kwipo.com',
+    'https://app.support.staging.kwipo.com',
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
