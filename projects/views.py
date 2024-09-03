@@ -7,6 +7,8 @@ from .services import *
 from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
+import cloudinary.uploader
+
 
 class ProjectListCreateView(ListCreateAPIView):
     queryset = ProjectService.get_all_projects()
@@ -114,6 +116,10 @@ class ProjectScreenCaptureDetailView(DestroyAPIView):
         screen_capture = ScreenCaptureService.get_screen_capture(kwargs['pk'])
         log = LogService.get_log(screen_capture.log_id.id)
         if str(log.user_id.id) == str(user_id):
+            image_url = screen_capture.image.url
+            public_id = image_url.replace("https://res.cloudinary.com/dmxsvedfi/image/upload/v1/", "").split('.')[0]
+            print(public_id)
+            cloudinary.uploader.destroy(public_id)
             log.images.remove(screen_capture)
             return super().delete(request, *args, **kwargs)
         return Response({'error': 'You are not authorized to delete this screen capture'}, status=status.HTTP_400_BAD_REQUEST)
