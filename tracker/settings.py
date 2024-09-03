@@ -40,11 +40,41 @@ INSTALLED_APPS = [
     'projects',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_ALL_ORIGINS= True
+CSRF_TRUSTED_ORIGINS = [
+    'https://app.staging.kwipo.com',
+    'https://app.support.dev.kwipo.com',
+    'http://localhost:5173',
+    'https://tracker-poc-hazel.vercel.app',
+    'https://app.support.staging.kwipo.com',
+]
+
+CSRF_COOKIE_SECURE = True
+
+CORS_ALLOWED_ORIGINS = [
+    'https://app.staging.kwipo.com',
+    'https://app.support.dev.kwipo.com',
+    'http://localhost:5173',
+    'https://tracker-poc-hazel.vercel.app',
+    'https://app.support.staging.kwipo.com',
+]
+
+
+# Allow credentials (e.g., cookies) to be sent with the request
+CORS_ALLOW_CREDENTIALS = True
+
+
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'PATCH',  # Make sure to include PATCH
+    'POST',
+    'PUT',
+    'OPTIONS',
+]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Ensure this is first
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -76,6 +106,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tracker.wsgi.application'
 
 
+# SPECTACULAR_SETTINGS = {
+#   'TITLE': 'API',
+#   'DESCRIPTION': 'API documentation for our app',
+#   'VERSION': '1.0.0',
+#   'SERVE_INCLUDE_SCHEMA': False,
+#   'COMPONENT_SPLIT_REQUEST': True
+# }
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
