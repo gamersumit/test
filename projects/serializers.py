@@ -5,13 +5,13 @@ from admins.serializers import UserSerializer
 class ProjectCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'name', 'description', 'admin_id','user']
+        fields = ['id', 'name', 'description', 'admin_id','users']
 
 class ProjectSerializer(serializers.ModelSerializer):
-    user = UserSerializer(many=True, read_only=True)
+    users = UserSerializer(many=True, read_only=True)
     class Meta:
         model = Project
-        fields = ['id', 'name', 'description','user']
+        fields = ['id', 'name', 'description','users']
 
 class LogSerializer(serializers.ModelSerializer):
     class Meta:
