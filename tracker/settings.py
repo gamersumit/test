@@ -139,6 +139,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://app.staging.kwipo.com',
     'https://app.support.dev.kwipo.com',
     'http://localhost:5173',
+    'http://192.168.1.75:5173',
+    'https://192.168.1.75:5173',
     'https://app.dev.kwipo.com',
     'https://app.support.staging.kwipo.com',
 ]
@@ -150,6 +152,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://app.support.dev.kwipo.com',
     'http://localhost:3000',
     'http://localhost:5173',
+    'https://192.168.1.75:5173',
+    'http://192.168.1.75:5173',
     'https://app.dev.kwipo.com',
     'https://app.support.staging.kwipo.com',
 ]
