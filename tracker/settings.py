@@ -139,15 +139,6 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'PATCH',
-    'OPTIONS',
-    'POST',
-    'PUT',
-]
-
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -159,6 +150,13 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ORIGIN_WHITELIST = (
+       'http://localhost:5173',
+)
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
