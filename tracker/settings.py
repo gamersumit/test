@@ -42,42 +42,7 @@ INSTALLED_APPS = [
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS= True
-
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://app.staging.kwipo.com',
-#     'https://app.support.dev.kwipo.com',
-#     'http://localhost:5173',
-#     'https://tracker-poc-hazel.vercel.app',
-#     'https://app.support.staging.kwipo.com',
-# ]
-
-# CSRF_COOKIE_SECURE = True
-
-# CORS_ALLOWED_ORIGINS = [
-#     'https://app.staging.kwipo.com',
-#     'https://app.support.dev.kwipo.com',
-#     'http://localhost:5173',
-#     'https://tracker-poc-hazel.vercel.app',
-#     'https://app.support.staging.kwipo.com',
-# ]
-
-
-# # Allow credentials (e.g., cookies) to be sent with the request
-# CORS_ALLOW_CREDENTIALS = True
-
-
-
-# CORS_ALLOW_METHODS = [
-#     'DELETE',
-#     'GET',
-#     'PATCH',  # Make sure to include PATCH
-#     'POST',
-#     'PUT',
-#     'OPTIONS',
-# ]
-
-# CORS_ORIGIN_ALLOW_ALL=True
-
+CORS_ALLOW_CREDENTIALS = False
 
 
 MIDDLEWARE = [
@@ -192,11 +157,6 @@ AUTH_USER_MODEL = 'admins.User'
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
-
-AUTHENTICATION_BACKENDS = [
-    'tracker.authenticaters.AdminUserBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUD_NAME'),
