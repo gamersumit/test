@@ -2,10 +2,9 @@ from django.shortcuts import render
 
 # Create your views here.
 from admins.utils import decode_access_token
-from admins.services import AdminService
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .services import ProjectService
-from .serializers import ProjectSerializer, ProjectCreateSerializer
+from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -63,3 +62,22 @@ class ProjectRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         if str(project.admin_id.id) == str(admin_id):
             return super().delete(request, *args, **kwargs)
         return Response({'error': 'You are not authorized to delete this project'}, status=status.HTTP_400_BAD_REQUEST)
+
+# class ProjectLogsView(ListCreateAPIView):
+#     queryset = ProjectService.get_all_projects()
+    
+#     def get(self, request, *args, **kwargs):
+
+        
+#         serializer = LogSerializer(logs, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#     def post(self, request, *args, **kwargs):
+#         project = ProjectService.get_project(kwargs['pk'])
+#         request.data['project_id'] = project.id
+#         serializer = LogCreateSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             log_data = LogSerializer(serializer.instance).data
+#             return Response(log_data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

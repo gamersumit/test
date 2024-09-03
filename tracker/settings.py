@@ -35,7 +35,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'admins',
-    'users',
     'projects',
 ]
 
@@ -165,8 +164,13 @@ SIMPLE_JWT = {
   'ROTATE_REFRESH_TOKENS': True,
 }
 
-AUTH_USER_MODEL = 'admins.Admin'
+AUTH_USER_MODEL = 'admins.User'
 
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
+
+AUTHENTICATION_BACKENDS = [
+    'tracker.authenticaters.AdminUserBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]

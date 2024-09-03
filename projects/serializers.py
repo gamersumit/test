@@ -1,6 +1,6 @@
-from . models import Project
+from . models import Project, Logs, ScreenCaptures
 from rest_framework import serializers
-from users.serializers import UserSerializer
+from admins.serializers import UserSerializer
 
 class ProjectCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,4 +13,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['id', 'name', 'description','user']
 
-    
+class LogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Logs
+        fields = ['id', 'project_id', 'user_id', 'date', 'start_time', 'end_time', 'description', 'images']
+
+class ScreenCaptureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScreenCaptures
+        fields = ['id', 'log_id', 'image']
