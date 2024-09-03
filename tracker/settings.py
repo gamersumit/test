@@ -55,6 +55,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://localhost:5174',
     'http://192.168.1.75:5173',
+    'https://tracker-poc-hazel.vercel.app'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
