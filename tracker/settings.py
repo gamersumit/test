@@ -39,24 +39,8 @@ INSTALLED_APPS = [
     'projects',
 ]
 
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # Ensure this is first
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+CORS_ALLOW_ALL_ORIGINS = True 
 
-CORS_ALLOW_ALL_ORIGINS = False  # False if you want to restrict origins
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://192.168.1.75:5173',
-    'https://tracker-poc-hazel.vercel.app'
-]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -80,6 +64,18 @@ CORS_ALLOW_HEADERS = [
     'x-csrftoken',
     'x-requested-with',
 ]
+
+MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Ensure this is first
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
 
 ROOT_URLCONF = 'tracker.urls'
 
