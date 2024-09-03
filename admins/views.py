@@ -23,6 +23,7 @@ class AdminCreateView(CreateAPIView):
             admin = AdminService.get_admin(serializer.data['id'])
             admin_data=AdminSerializer(admin).data
             admin_token=create_admin_token(admin)
+            print(admin_token)
             return Response({"access_token":f"{admin_token['access_token']}","refresh_token":f"{admin_token['refresh_token']}","data":admin_data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,7 +43,7 @@ class AdminLoginView(CreateAPIView):
 
 class AdminGoogleOauthView(CreateAPIView):
     queryset = AdminService.get_all_admins()
-    serializer_class = GoogleSerializer
+    serializer_class = AdminSerializer
     permission_classes = [AllowAny]
     authentication_classes = []
 
