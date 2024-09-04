@@ -1,5 +1,6 @@
 from django.shortcuts import render
-
+import base64
+from django.core.files.base import ContentFile
 # Create your views here.
 from admins.utils import decode_access_token
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView, ListAPIView
@@ -152,12 +153,16 @@ class ProjectScreenCaptureView(CreateAPIView):
         log = LogService.get_log(request.data.get('log_id'))
         
         if str(log.user_id.id) == str(user_id):
-            images = request.FILES.getlist('image')
+            images = request.data.get('images')
             if not images:
                 return Response({'error': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
             
             saved_images = []
-            for image in images:
+            for image_data in images:
+                format, imgstr = image_data.split(';base64,') 
+                ext = format.split('/')[-1] 
+                image = ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
+                
                 data = {
                     'log_id': request.data.get('log_id'),
                     'image': image
@@ -173,7 +178,6 @@ class ProjectScreenCaptureView(CreateAPIView):
             return Response(saved_images, status=status.HTTP_201_CREATED)
         
         return Response({'error': 'You are not authorized to add screen capture to this log'}, status=status.HTTP_400_BAD_REQUEST)
-
 class ProjectScreenCaptureDetailView(DestroyAPIView):
     queryset = ScreenCaptureService.get_all_screen_captures()
     serializer_class=ScreenCaptureCreateSerializer
