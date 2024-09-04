@@ -39,6 +39,8 @@ class AdminLoginView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         admin = AdminService.get_admin_by_email(request.data['email'])
+        if admin.is_admin==False and request.data['login_type'] == 'admin':
+            return Response({'error': 'Not an admin'}, status=status.HTTP_400_BAD_REQUEST)
         admin_data = AdminSerializer(admin).data
         if check_password(request.data['password'], admin.password):
             admin_token=create_admin_token(admin)
