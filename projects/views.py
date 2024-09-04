@@ -8,7 +8,7 @@ from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 import cloudinary.uploader
-
+from admins.services import UserService
 
 class ProjectListCreateView(ListCreateAPIView):
     queryset = ProjectService.get_all_projects()
@@ -31,6 +31,10 @@ class ProjectListCreateView(ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
+        if request.query_params.get('user_id'):
+            project_list = ProjectService.filter_project_by_user_id(request.query_params.get('user_id'))
+            serializer = ProjectSerializer(project_list, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         project_list = ProjectService.get_all_projects()
         serializer = ProjectSerializer(project_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

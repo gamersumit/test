@@ -11,7 +11,7 @@ class ProjectService:
         return Project.objects.filter(admin_id=admin_id)
     
     def filter_project_by_user_id(user_id):
-        return Project.objects.filter(user=user_id)
+        return Project.objects.filter(users=user_id)
     
 class LogService:
     def get_all_logs():
