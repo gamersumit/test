@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from admins.utils import decode_access_token
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView, ListAPIView
 from .services import *
 from .serializers import *
 from rest_framework.response import Response
@@ -31,14 +31,18 @@ class ProjectListCreateView(ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
-        if request.query_params.get('user_id'):
-            project_list = ProjectService.filter_project_by_user_id(request.query_params.get('user_id'))
-            serializer = ProjectSerializer(project_list, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        project_list = ProjectService.get_all_projects()
+        project_list = ProjectService.filter_project_by_admin_id(request.query_params.get('admin_id'))
         serializer = ProjectSerializer(project_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+class UserProjectAPIView(ListAPIView):
+    def get(self, request, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        user_id = decode_access_token(token).get('user_id')
+        project_list = ProjectService.filter_project_by_user_id(user_id)
+        serializer = ProjectSerializer(project_list, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 class ProjectRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = ProjectService.get_all_projects()
     lookup_field = 'pk'
