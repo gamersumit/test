@@ -102,7 +102,7 @@ class ProjectLogsView(ListCreateAPIView):
             log_data = LogSerializer(serializer.instance).data
             log_data['date'], log_data['start_time'] = convert_timestamp_iso8601(log_data['start_timestamp'],request.data.get('offset'))
             if log_data['end_timestamp']:
-                log_data['end_time'] = convert_timestamp_iso8601(log_data['end_timestamp'],request.data.get('offset'))
+                log_data['end_time'] = convert_timestamp_iso8601(log_data['end_timestamp'],request.data.get('offset'))[1]
             else:
                 log_data['end_time'] = None
             return Response(log_data, status=status.HTTP_201_CREATED)
@@ -117,14 +117,23 @@ class ProjectLogsDetailView(RetrieveUpdateDestroyAPIView):
         if self.request.method == 'PUT':
             return LogEditSerializer
         return LogSerializer
-
+    
     def put(self, request, *args, **kwargs):
-        date, start_time = convert_timestamp(request.data.get('start_timestamp'))
-        request.data['date'] = date
-        request.data['start_time'] = start_time
-        if request.data.get('end_timestamp'):
-            request.data['end_time'] = convert_timestamp(request.data.get('end_timestamp'))[1]
-        return super().put(request, *args, **kwargs)
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        user_id = decode_access_token(token).get('user_id')
+        log = LogService.get_log(kwargs['pk'])
+        if str(log.user_id.id) == str(user_id):
+            data=super().put(request, *args, **kwargs)
+            log_data = LogSerializer(LogService.get_log(kwargs['pk'])).data
+            log_data['date'], log_data['start_time'] = convert_timestamp_iso8601(log_data['start_timestamp'],request.data.get('offset'))
+            if log_data['end_timestamp']:
+                log_data['end_time'] = convert_timestamp_iso8601(log_data['end_timestamp'],request.data.get('offset'))[1]
+            else:
+                log_data['end_time'] = None
+            return Response(log_data, status=status.HTTP_200_OK)
+        return Response({'error': 'You are not authorized to edit this log'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProjectScreenCaptureView(CreateAPIView):
     queryset = ScreenCaptureService.get_all_screen_captures()
