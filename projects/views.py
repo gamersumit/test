@@ -89,7 +89,13 @@ class ProjectLogsView(ListCreateAPIView):
         project = ProjectService.get_project(request.query_params.get('project_id'))
         logs = LogService.filter_logs_by_project_id(project.id)
         serializer = LogSerializer(logs, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        filtered_logs = []
+        for log in serializer.data:
+            log['date'], log['start_time'] = convert_timestamp_iso8601(str(log['start_timestamp']),int(request.query_params.get('offset')))
+            if log['end_timestamp']:
+                log['end_time'] = convert_timestamp_iso8601(log['end_timestamp'],int(request.query_params.get('offset')))[1]
+                filtered_logs.append(log)
+        return Response(filtered_logs, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
         auth_header = request.headers.get('Authorization')
