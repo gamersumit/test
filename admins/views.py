@@ -1,13 +1,14 @@
-from rest_framework.generics import ListCreateAPIView, CreateAPIView
-from . services import AdminService
-from . serializers import AdminCreateSerializer, AdminSerializer, GoogleSerializer,UserEditSerializer
-from django.contrib.auth.hashers import make_password,check_password
-from . utils import *
-from . models import User
+from rest_framework.generics import ListCreateAPIView, CreateAPIView, RetrieveUpdateDestroyAPIView
+from .services import AdminService, UserService
+from .serializers import AdminCreateSerializer, AdminSerializer, GoogleSerializer, UserEditSerializer, UserSerializer, UserCreateSerializer
+from django.contrib.auth.hashers import make_password, check_password
+from .utils import *
+from .models import User
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from django.shortcuts import get_object_or_404
+from admins.utils import decode_access_token
+from admins.services import AdminService
 
 class AdminCreateView(CreateAPIView):
     queryset = AdminService.get_all_admins()
@@ -68,16 +69,7 @@ class GoogleOauthView(CreateAPIView):
             return JsonResponse({'message': 'Unauthorized User'}, status=200)
         jwt_access_token, jwt_refresh_token = create_jwt_tokens(admin, google_access_token, google_refresh_token)
         return JsonResponse({'access_token': f"Bearer {jwt_access_token}", 'refresh_token': f"Bearer {jwt_refresh_token}", 'data': admin_data},status=200) 
-    
 
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from . services import UserService
-from . serializers import UserSerializer,UserCreateSerializer
-from admins.utils import decode_access_token
-from rest_framework.response import Response
-from rest_framework import status
-from admins.services import AdminService
-from django.contrib.auth.hashers import make_password,check_password
 
 class UserListCreateView(ListCreateAPIView):
     queryset = UserService.get_all_users()
@@ -130,4 +122,11 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         if self.request.method == 'PUT':
             return UserEditSerializer
         return UserSerializer
+    
+    def delete(self, request, *args, **kwargs):
+        id=kwargs['pk']
+        user = UserService.get_user(id)
+        if user.is_admin:
+            return Response({'error': 'You are not authorized to delete this user'}, status=status.HTTP_400_BAD_REQUEST)
+        return super().delete(request, *args, **kwargs)
     
