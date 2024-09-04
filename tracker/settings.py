@@ -166,3 +166,5 @@ CLOUDINARY_STORAGE = {
 
 MEDIA_URL = '/media/'  # or any prefix you choose
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760 
