@@ -5,6 +5,7 @@ from admins.utils import decode_access_token
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, DestroyAPIView, ListAPIView
 from .services import *
 from .serializers import *
+from .utils import *
 from rest_framework.response import Response
 from rest_framework import status
 import cloudinary.uploader
@@ -90,15 +91,40 @@ class ProjectLogsView(ListCreateAPIView):
         serializer = LogSerializer(logs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-class ProjectLogsDetailView(RetrieveUpdateDestroyAPIView):
+    def post(self, request, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        user_id = decode_access_token(token).get('user_id')
+        request.data['user_id'] = user_id
+        serializer=self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            log_data = LogSerializer(serializer.instance).data
+            log_data['date'], log_data['start_time'] = convert_timestamp_iso8601(log_data['start_timestamp'],request.data.get('offset'))
+            if log_data['end_timestamp']:
+                log_data['end_time'] = convert_timestamp_iso8601(log_data['end_timestamp'],request.data.get('offset'))
+            else:
+                log_data['end_time'] = None
+            return Response(log_data, status=status.HTTP_201_CREATED)
+        return super().post(request, *args, **kwargs)
+    
+class ProjectLogsDetailView(RetrieveUpdateDestroyAPIView): 
     queryset = LogService.get_all_logs()
     lookup_field = 'pk'
     http_method_names = ['put', 'delete']
     
     def get_serializer_class(self):
         if self.request.method == 'PUT':
-            return LogCreateSerializer
+            return LogEditSerializer
         return LogSerializer
+
+    def put(self, request, *args, **kwargs):
+        date, start_time = convert_timestamp(request.data.get('start_timestamp'))
+        request.data['date'] = date
+        request.data['start_time'] = start_time
+        if request.data.get('end_timestamp'):
+            request.data['end_time'] = convert_timestamp(request.data.get('end_timestamp'))[1]
+        return super().put(request, *args, **kwargs)
 
 class ProjectScreenCaptureView(CreateAPIView):
     queryset = ScreenCaptureService.get_all_screen_captures()

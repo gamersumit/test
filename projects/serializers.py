@@ -16,7 +16,12 @@ class ProjectSerializer(serializers.ModelSerializer):
 class LogCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logs
-        fields = ['id', 'project_id', 'user_id', 'date', 'start_time', 'end_time', 'description']
+        fields = ['id', 'project_id', 'user_id','start_timestamp','end_timestamp', 'description']
+
+class LogEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Logs
+        fields = ['start_timestamp','end_timestamp', 'description']
 
 
 class ScreenCaptureCreateSerializer(serializers.ModelSerializer):
@@ -28,7 +33,7 @@ class LogSerializer(serializers.ModelSerializer):
     images = ScreenCaptureCreateSerializer(many=True, read_only=True)
     class Meta:
         model = Logs
-        fields = ['id', 'project_id', 'user_id', 'date', 'start_time', 'end_time', 'description', 'images']
+        fields = ['id', 'project_id', 'user_id','start_timestamp','end_timestamp', 'description', 'images']
 
 class UserProjectSerializer(serializers.ModelSerializer):
     class Meta:
