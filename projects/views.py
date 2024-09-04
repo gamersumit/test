@@ -143,22 +143,35 @@ class ProjectLogsDetailView(RetrieveUpdateDestroyAPIView):
 
 class ProjectScreenCaptureView(CreateAPIView):
     queryset = ScreenCaptureService.get_all_screen_captures()
-    serializer_class=ScreenCaptureCreateSerializer
+    serializer_class = ScreenCaptureCreateSerializer
     
     def post(self, request, *args, **kwargs):
         auth_header = request.headers.get('Authorization')
         token = auth_header.split(' ')[1]
         user_id = decode_access_token(token).get('user_id')
         log = LogService.get_log(request.data.get('log_id'))
+        
         if str(log.user_id.id) == str(user_id):
-            serializer = self.get_serializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                log.images.add(serializer.instance)
-                image_data = ScreenCaptureService.get_screen_capture(serializer.instance.id)
-                screen_capture_data = ScreenCaptureCreateSerializer(image_data).data
-                return Response(screen_capture_data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            images = request.FILES.getlist('image')
+            if not images:
+                return Response({'error': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            saved_images = []
+            for image in images:
+                data = {
+                    'log_id': request.data.get('log_id'),
+                    'image': image
+                }
+                serializer = self.get_serializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    log.images.add(serializer.instance)
+                    saved_images.append(ScreenCaptureCreateSerializer(serializer.instance).data)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response(saved_images, status=status.HTTP_201_CREATED)
+        
         return Response({'error': 'You are not authorized to add screen capture to this log'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ProjectScreenCaptureDetailView(DestroyAPIView):
