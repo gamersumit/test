@@ -31,7 +31,10 @@ class ProjectListCreateView(ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
-        project_list = ProjectService.filter_project_by_admin_id(request.query_params.get('admin_id'))
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        user_id = decode_access_token(token).get('user_id')
+        project_list = ProjectService.filter_project_by_admin_id(user_id)
         serializer = ProjectSerializer(project_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
