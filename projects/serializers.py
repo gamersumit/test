@@ -29,3 +29,8 @@ class LogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Logs
         fields = ['id', 'project_id', 'user_id', 'date', 'start_time', 'end_time', 'description', 'images']
+
+class UserProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'name', 'description']

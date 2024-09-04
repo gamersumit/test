@@ -39,13 +39,17 @@ class ProjectListCreateView(ListCreateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserProjectAPIView(ListAPIView):
+    serializer_class=UserProjectSerializer
+    queryset = ProjectService.get_all_projects()
+
     def get(self, request, *args, **kwargs):
         auth_header = request.headers.get('Authorization')
         token = auth_header.split(' ')[1]
         user_id = decode_access_token(token).get('user_id')
         project_list = ProjectService.filter_project_by_user_id(user_id)
-        serializer = ProjectSerializer(project_list, many=True)
+        serializer = UserProjectSerializer(project_list, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
 class ProjectRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = ProjectService.get_all_projects()
     lookup_field = 'pk'
