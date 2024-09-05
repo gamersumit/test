@@ -87,8 +87,13 @@ class ProjectLogsView(ListCreateAPIView):
     serializer_class=LogCreateSerializer
 
     def get(self, request, *args, **kwargs):
-        project = ProjectService.get_project(request.query_params.get('project_id'))
-        logs = LogService.filter_logs_by_project_id(project.id)
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        if not request.query_params.get('user_id'):
+            user_id = decode_access_token(token).get('user_id')
+        else:
+            user_id = request.query_params.get('user_id')
+        logs = LogService.filter_logs_by_project_id_and_user_id(request.query_params.get('project_id'),user_id)
         serializer = LogSerializer(logs, many=True)
         filtered_logs = []
         for log in serializer.data:

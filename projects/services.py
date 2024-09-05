@@ -22,6 +22,9 @@ class LogService:
     
     def filter_logs_by_project_id(project_id):
         return Logs.objects.filter(project_id=project_id)
+    
+    def filter_logs_by_project_id_and_user_id(project_id,user_id):
+        return Logs.objects.filter(project_id=project_id,user_id=user_id)
 
 class ScreenCaptureService:
     def get_all_screen_captures():
