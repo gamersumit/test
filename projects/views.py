@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import cloudinary.uploader
 from admins.services import UserService
+from datetime import datetime, time
 
 class ProjectListCreateView(ListCreateAPIView):
     queryset = ProjectService.get_all_projects()
@@ -201,3 +202,40 @@ class ProjectScreenCaptureDetailView(DestroyAPIView):
             log.images.remove(screen_capture)
             return super().delete(request, *args, **kwargs)
         return Response({'error': 'You are not authorized to delete this screen capture'}, status=status.HTTP_400_BAD_REQUEST)
+    
+class ProjectLogsFilterView(CreateAPIView):
+    queryset = ProjectService.get_all_projects()
+    serializer_class=LogCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        project_id = request.data.get('project_id')
+        offset = int(request.data.get('offset', 0))
+        date_str = request.data.get('date')  
+
+        if not date_str:
+            return Response({'error': 'Date is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Parse the date
+        try:
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Define the time range
+        start_datetime = datetime.combine(date, time(0, 0))  # 12:00 AM
+        end_datetime = datetime.combine(date, time(12, 0))   # 12:00 PM
+
+        # Filter logs by project_id, user_id, and the specified time range
+        logs = LogService.filter_logs_by_project_id_and_user_id(project_id, user_id)
+        logs = logs.filter(start_timestamp__range=(start_datetime, end_datetime))
+
+        serializer = LogSerializer(logs, many=True)
+        filtered_logs = []
+        for log in serializer.data:
+            log['date'], log['start_time'] = convert_timestamp_iso8601(str(log['start_timestamp']), offset)
+            if log['end_timestamp']:
+                log['end_time'] = convert_timestamp_iso8601(log['end_timestamp'], offset)[1]
+            filtered_logs.append(log)
+
+        return Response(filtered_logs, status=status.HTTP_200_OK)
