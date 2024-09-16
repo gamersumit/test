@@ -68,7 +68,7 @@ class GoogleOauthView(CreateAPIView):
             admin = AdminService.get_admin_by_email(email)
             admin_data = AdminSerializer(admin).data
         except User.DoesNotExist:
-            return JsonResponse({'message': 'Unauthorized User'}, status=200)
+            return JsonResponse({'message': 'Unauthorized User'}, status=400)
         jwt_access_token, jwt_refresh_token = create_jwt_tokens(admin, google_access_token, google_refresh_token)
         return JsonResponse({'access_token': f"Bearer {jwt_access_token}", 'refresh_token': f"Bearer {jwt_refresh_token}", 'data': admin_data},status=200) 
 
@@ -131,4 +131,37 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         if user.is_admin:
             return Response({'error': 'You are not authorized to delete this user'}, status=status.HTTP_400_BAD_REQUEST)
         return super().delete(request, *args, **kwargs)
-    
+
+class GoogleOauthSignupView(CreateAPIView):
+    queryset = AdminService.get_all_admins()
+    serializer_class = AdminSerializer
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request, *args, **kwargs):
+        auth_code = request.data.get('code')
+        response = exchange_google_token(auth_code)
+        if response.status_code != 200:
+            return Response({'message': 'Unable to exchange token.', 'error': response.json()}, status=status.HTTP_400_BAD_REQUEST)
+        token_info = response.json()
+        google_access_token = token_info.get('access_token')
+        google_refresh_token = token_info.get('refresh_token')
+        data=fetch_google_profile(google_access_token)
+
+        user_data={
+            'first_name':data['name'].split()[0],
+            'last_name':data['name'].split()[1],
+            'email':data['email'],
+            'password':None,
+            'admin_id':None,
+            'designation':'admin',
+            'is_admin':True
+        }
+        user = UserService.create_user(user_data)
+        user.admin_id=user
+        user.save()
+
+        user_data = UserSerializer(user).data
+
+        jwt_access_token, jwt_refresh_token = create_jwt_tokens(user, google_access_token, google_refresh_token)
+        return JsonResponse({'access_token': f"Bearer {jwt_access_token}", 'refresh_token': f"Bearer {jwt_refresh_token}", 'data': user_data},status=200) 

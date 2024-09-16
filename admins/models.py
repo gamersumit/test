@@ -7,7 +7,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
-    password = models.CharField(max_length=100)
+    password = models.CharField(max_length=100, blank=True, null=True)
     designation = models.CharField(max_length=100)
     admin_id = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='user_subordinates')
     is_admin = models.BooleanField(default=False)
