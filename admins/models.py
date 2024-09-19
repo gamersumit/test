@@ -9,6 +9,7 @@ class User(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
     password = models.CharField(max_length=100, blank=True, null=True)
     designation = models.CharField(max_length=100)
+    image=models.ImageField(upload_to='images/',null=True,blank=True)
     admin_id = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='user_subordinates')
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
