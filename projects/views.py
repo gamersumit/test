@@ -56,7 +56,7 @@ class UserProjectAPIView(ListAPIView):
 class ProjectRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = ProjectService.get_all_projects()
     lookup_field = 'pk'
-    http_method_names = ['put', 'delete']
+    http_method_names = ['put', 'delete', 'get']
     
     def get_serializer_class(self):
         if self.request.method == 'PUT':
@@ -82,6 +82,11 @@ class ProjectRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         if str(project.admin_id.id) == str(admin_id):
             return super().delete(request, *args, **kwargs)
         return Response({'error': 'You are not authorized to delete this project'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self, request, *args, **kwargs):
+        project = ProjectService.get_project(kwargs['pk'])
+        project_data = ProjectSerializer(project).data
+        return Response(project_data, status=status.HTTP_200_OK)
 
 class ProjectLogsView(ListCreateAPIView):
     queryset = ProjectService.get_all_projects()
