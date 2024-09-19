@@ -9,6 +9,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from admins.utils import decode_access_token
 from admins.services import AdminService
+from projects.services import ProjectService
+from projects.serializers import ProjectSerializer
 
 class AdminCreateView(CreateAPIView):
     queryset = AdminService.get_all_admins()
@@ -124,6 +126,14 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         if self.request.method == 'PUT':
             return UserEditSerializer
         return UserSerializer
+    
+    def get(self, request, *args, **kwargs):
+        id=kwargs['pk']
+        user = UserService.get_user(id)
+        user_data = UserSerializer(user).data
+        projects = ProjectSerializer(ProjectService.filter_project_by_user_id(id), many=True).data
+        user_data['projects'] = projects
+        return Response(user_data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
         id=kwargs['pk']
