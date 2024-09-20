@@ -92,10 +92,13 @@ class UserListCreateView(ListCreateAPIView):
             request.data['admin_id'] = admin_obj.id
             request.data['password'] = make_password('testtest')
             serializer = self.get_serializer(data=request.data)
-            print(serializer)
             if serializer.is_valid():
                 serializer.save()
                 data = serializer.data
+                for project in data['projects']:
+                    project_data=ProjectService.get_project(project)
+                    project_data.users.add(data['id'])
+                    project_data.save()
                 data.pop('admin_id')
                 data.pop('password')
                 return Response(data, status=status.HTTP_201_CREATED)
@@ -134,6 +137,24 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         projects = ProjectSerializer(ProjectService.filter_project_by_user_id(id), many=True).data
         user_data['projects'] = projects
         return Response(user_data, status=status.HTTP_200_OK)
+    
+    def put(self, request, *args, **kwargs):
+        id=kwargs['pk']
+        user = UserService.get_user(id)
+        if user.is_admin:
+            return Response({'error': 'You are not authorized to update this user'}, status=status.HTTP_400_BAD_REQUEST)
+        data= super().put(request, *args, **kwargs)
+        for project in request.data['projects']:
+            project_data=ProjectService.get_project(project['id'])
+            project_data.users.add(project)
+            project_data.save()
+        user = UserService.get_user(id)
+        user_data = UserSerializer(user).data
+        projects = ProjectSerializer(ProjectService.filter_project_by_user_id(id), many=True).data
+        user_data['projects'] = projects
+        return Response(data, status=status.HTTP_200_OK)
+        
+
     
     def delete(self, request, *args, **kwargs):
         id=kwargs['pk']

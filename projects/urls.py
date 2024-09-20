@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('', ProjectListCreateView.as_view(), name='project-create'),
     path('users/', UserProjectAPIView.as_view(), name='user-create'),
+    path('users/remove/', ProjectsRemoveAPIView.as_view(), name='user-project-remove'),
     path('users/logs/', ProjectLogsView.as_view(), name='log-create'),
     path('users/logs/filter/', ProjectLogsFilterView.as_view(), name='logs-filter'),
     path('users/logs/screencaptures/', ProjectScreenCaptureView.as_view(), name='screencapture'),
