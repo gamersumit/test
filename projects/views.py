@@ -245,11 +245,11 @@ class ProjectLogsFilterView(CreateAPIView):
 
         return Response(filtered_logs, status=status.HTTP_200_OK)
     
-class ProjectsRemoveAPIView(DestroyAPIView):
+class ProjectsRemoveAPIView(CreateAPIView):
     queryset = ProjectService.get_all_projects()
     lookup_field = 'pk'
     
-    def delete(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         projects = request.data.get('projects')
         user_id=request.data.get('user_id')
 
