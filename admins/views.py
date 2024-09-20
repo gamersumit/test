@@ -84,7 +84,7 @@ class UserListCreateView(ListCreateAPIView):
         return UserSerializer
     
     def post(self, request, *args, **kwargs):
-        try:
+        # try:
             auth_header = request.headers.get('Authorization')
             token = auth_header.split(' ')[1]
             admin_id = decode_access_token(token).get('user_id')
@@ -95,19 +95,21 @@ class UserListCreateView(ListCreateAPIView):
             if serializer.is_valid():
                 serializer.save()
                 data = serializer.data
-                for project in data['projects']:
+                for project in request.data['projects']:
                     project_data=ProjectService.get_project(project)
                     project_data.users.add(data['id'])
                     project_data.save()
+                project_list = ProjectSerializer(ProjectService.filter_project_by_user_id(data['id']),many=True).data
+                data['projects'] = project_list
                 data.pop('admin_id')
                 data.pop('password')
                 return Response(data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            # Log the exception
-            print(f"Exception occurred: {e}")
-            # Return the exception message as a string
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        # except Exception as e:
+        #     # Log the exception
+        #     print(f"Exception occurred: {e}")
+        #     # Return the exception message as a string
+        #     return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
         try:
@@ -154,7 +156,7 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         request_projects_set = set(request.data['projects'])        
         projects_added = request_projects_set - projects_id_set
         projects_removed = projects_id_set - request_projects_set
-        
+
         for project in projects_added: 
             project_data=ProjectService.get_project(project)
             project_data.users.add(id)

@@ -19,7 +19,7 @@ class GoogleSerializer(serializers.ModelSerializer):
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email','admin_id','image','designation','password','projects']
+        fields = ['id', 'first_name', 'last_name', 'email','admin_id','image','designation','password']
 
 class UserEditSerializer(serializers.ModelSerializer):
     class Meta:
