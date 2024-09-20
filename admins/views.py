@@ -148,15 +148,13 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         users_project=ProjectService.filter_project_by_user_id(id)
         projects_id_list=[]
         for project in users_project:
-            projects_id_list.append(project.id)
+            projects_id_list.append(str(project.id))
         
         projects_id_set = set(projects_id_list)
-        request_projects_set = set(request.data['projects'])
-        
+        request_projects_set = set(request.data['projects'])        
         projects_added = request_projects_set - projects_id_set
-        
         projects_removed = projects_id_set - request_projects_set
-
+        
         for project in projects_added: 
             project_data=ProjectService.get_project(project)
             project_data.users.add(id)
