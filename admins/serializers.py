@@ -9,7 +9,7 @@ class AdminCreateSerializer(serializers.ModelSerializer):
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email']
+        fields = ['id', 'first_name', 'last_name', 'email','designation']
 
 class GoogleSerializer(serializers.ModelSerializer):
     class Meta:
