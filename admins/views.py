@@ -141,18 +141,37 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         id=kwargs['pk']
         user = UserService.get_user(id)
-        if user.is_admin:
+        print(user.is_admin)
+        if user.is_admin==False:
             return Response({'error': 'You are not authorized to update this user'}, status=status.HTTP_400_BAD_REQUEST)
         data= super().put(request, *args, **kwargs)
-        for project in request.data['projects']:
-            project_data=ProjectService.get_project(project['id'])
-            project_data.users.add(project)
+
+        users_project=ProjectService.filter_project_by_user_id(id)
+        projects_id_list=[]
+        for project in users_project:
+            projects_id_list.append(project.id)
+        
+        projects_id_set = set(projects_id_list)
+        request_projects_set = set(request.data['projects'])
+        
+        projects_added = request_projects_set - projects_id_set
+        
+        projects_removed = projects_id_set - request_projects_set
+
+        for project in projects_added: 
+            project_data=ProjectService.get_project(project)
+            project_data.users.add(id)
+            project_data.save()
+        
+        for project in projects_removed:
+            project_data=ProjectService.get_project(project)
+            project_data.users.remove(id)
             project_data.save()
         user = UserService.get_user(id)
         user_data = UserSerializer(user).data
         projects = ProjectSerializer(ProjectService.filter_project_by_user_id(id), many=True).data
         user_data['projects'] = projects
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(user_data, status=status.HTTP_200_OK)
         
 
     
