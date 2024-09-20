@@ -175,3 +175,19 @@ class GoogleOauthSignupView(CreateAPIView):
 
         jwt_access_token, jwt_refresh_token = create_jwt_tokens(user, google_access_token, google_refresh_token)
         return JsonResponse({'access_token': f"Bearer {jwt_access_token}", 'refresh_token': f"Bearer {jwt_refresh_token}", 'data': user_data},status=200) 
+
+class UserDataView(ListCreateAPIView):
+    queryset = UserService.get_all_users()
+    lookup_field = 'pk'
+    http_method_names = ['get']
+    serializer_class = UserSerializer
+    
+    def get(self, request, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        user_id = decode_access_token(token).get('user_id')
+        user = UserService.get_user(user_id)
+        user_data = UserSerializer(user).data
+        projects = ProjectSerializer(ProjectService.filter_project_by_user_id(user_id), many=True).data
+        user_data['projects'] = projects
+        return Response(user_data, status=status.HTTP_200_OK)
