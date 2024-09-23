@@ -84,7 +84,7 @@ class UserListCreateView(ListCreateAPIView):
         return UserSerializer
     
     def post(self, request, *args, **kwargs):
-        # try:
+        try:
             auth_header = request.headers.get('Authorization')
             token = auth_header.split(' ')[1]
             admin_id = decode_access_token(token).get('user_id')
@@ -105,11 +105,11 @@ class UserListCreateView(ListCreateAPIView):
                 data.pop('password')
                 return Response(data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # except Exception as e:
-        #     # Log the exception
-        #     print(f"Exception occurred: {e}")
-        #     # Return the exception message as a string
-        #     return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Log the exception
+            print(f"Exception occurred: {e}")
+            # Return the exception message as a string
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
         try:
