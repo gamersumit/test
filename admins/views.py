@@ -118,6 +118,9 @@ class UserListCreateView(ListCreateAPIView):
             admin_id = decode_access_token(token).get('user_id')
             user_list=UserService.filter_user_by_admin_id(admin_id)
             serializer=UserSerializer(user_list,many=True)
+            for user in serializer.data:
+                projects = ProjectSerializer(ProjectService.filter_project_by_user_id(user['id']), many=True).data
+                user['projects'] = projects
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': e}, status=status.HTTP_400_BAD_REQUEST)
