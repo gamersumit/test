@@ -162,7 +162,7 @@ class ProjectScreenCaptureView(CreateAPIView):
         token = auth_header.split(' ')[1]
         user_id = decode_access_token(token).get('user_id')
         log = LogService.get_log(request.data.get('log_id'))
-        
+                
         if str(log.user_id.id) == str(user_id):
             images = request.data.get('images')
             if not images:

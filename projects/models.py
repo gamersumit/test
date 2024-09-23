@@ -34,6 +34,7 @@ class ScreenCaptures(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     log_id = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name='screen_captures')
     image = models.ImageField(upload_to='images/')
+    key_and_mouse_press=models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

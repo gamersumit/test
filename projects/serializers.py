@@ -27,7 +27,7 @@ class LogEditSerializer(serializers.ModelSerializer):
 class ScreenCaptureCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScreenCaptures
-        fields = ['id','log_id', 'image','created_at']
+        fields = ['id','log_id', 'image','created_at','key_and_mouse_press']
         
 class LogSerializer(serializers.ModelSerializer):
     images = ScreenCaptureCreateSerializer(many=True, read_only=True)
