@@ -156,8 +156,8 @@ class ProjectLogsDetailView(RetrieveUpdateDestroyAPIView):
 
 
 class ProjectScreenCaptureView(CreateAPIView):
-    queryset = ScreenCaptureService.get_all_screen_captures()
-    serializer_class = ScreenCaptureCreateSerializer
+    queryset = None
+    serializer_class = LogInstanceCreateSerializer
     
     def post(self, request, *args, **kwargs):
         auth_header = request.headers.get('Authorization')
@@ -165,32 +165,49 @@ class ProjectScreenCaptureView(CreateAPIView):
         user_id = decode_access_token(token).get('user_id')
         log = LogService.get_log(request.data.get('log_id'))
                 
-        if str(log.user_id.id) == str(user_id):
-            images = request.data.get('images')
-            if not images:
-                return Response({'error': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            saved_images = []
-            for image_data in images:
+        # if str(log.user_id.id) != str(user_id):
+        #     return Response({'error': 'You are not authorized to add screen capture to this log'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        images = request.data.get('images')
+        # if not images:
+        #     return Response({'error': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        saved_images = []
+        for image_data in images:
+            try:
                 format, imgstr = image_data.split(';base64,') 
                 ext = format.split('/')[-1] 
                 image = ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
-                
-                data = {
-                    'log_id': request.data.get('log_id'),
-                    'image': image
-                }
-                serializer = self.get_serializer(data=data)
-                if serializer.is_valid():
-                    serializer.save()
-                    log.images.add(serializer.instance)
-                    saved_images.append(ScreenCaptureCreateSerializer(serializer.instance).data)
-                else:
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            except (ValueError, TypeError):
+                return Response({'error': 'Invalid image data'}, status=status.HTTP_400_BAD_REQUEST)
             
-            return Response(saved_images, status=status.HTTP_201_CREATED)
+            data = {
+                'log_id': request.data.get('log_id'),
+                'image': image
+            }
+            serializer = ScreenCaptureCreateSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                log.images.add(serializer.instance)
+                saved_images.append(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({'error': 'You are not authorized to add screen capture to this log'}, status=status.HTTP_400_BAD_REQUEST)
+        key_and_mouse_press_data = request.data.get('key_and_mouse_press', {})
+
+        for timestamp, data in key_and_mouse_press_data.items():
+            data['created_at'] = timestamp 
+            data['log_id'] = log.id
+            key_mouse_press = KeyMousePressCreateSerializer(data=data)
+            if key_mouse_press.is_valid():
+                key_mouse_press.save()
+                log.key_and_mouse_press.add(key_mouse_press.instance)
+            else:
+                return Response(key_mouse_press.errors, status=status.HTTP_400_BAD_REQUEST)
+                
+        log_serializer = LogInstanceCreateSerializer(log)
+        return Response(log_serializer.data, status=status.HTTP_201_CREATED)
+    
 class ProjectScreenCaptureDetailView(DestroyAPIView):
     queryset = ScreenCaptureService.get_all_screen_captures()
     serializer_class=ScreenCaptureCreateSerializer
@@ -244,6 +261,7 @@ class ProjectLogsFilterView(CreateAPIView):
             if log['end_timestamp']:
                 log['end_time'] = convert_timestamp_iso8601(log['end_timestamp'], offset)[1]
             grouped_images = defaultdict(list)
+            grouped_key_press = defaultdict(list)
 
             for image in log['images']:
                 # Parse datetime and truncate to minute precision, formatting as requested
@@ -252,9 +270,18 @@ class ProjectLogsFilterView(CreateAPIView):
                 
                 # Add the image to the appropriate group
                 grouped_images[minute_group].append(image)
+            for key_press in log['key_and_mouse_press']:
+                # Parse datetime and truncate to minute precision, formatting as requested
+                dt = datetime.strptime(key_press['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                minute_group = dt.strftime('%Y-%m-%dT%H:%M:00.000000Z')
+                
+                # Add the image to the appropriate group
+                grouped_key_press[minute_group].append(key_press)
+            log['key_and_mouse_press'] = grouped_key_press
 
             
             log['images'] = grouped_images
+        
             filtered_logs.append(log)
         
         return Response(filtered_logs, status=status.HTTP_200_OK)

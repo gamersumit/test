@@ -24,6 +24,7 @@ class Logs(models.Model):
     end_timestamp = models.DateTimeField(null=True, blank=True)
     description = models.TextField()
     images = models.ManyToManyField('ScreenCaptures', related_name='logs')
+    key_and_mouse_press = models.ManyToManyField('KeyMousePress', related_name='logs')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -34,9 +35,20 @@ class ScreenCaptures(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     log_id = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name='screen_captures')
     image = models.ImageField(upload_to='images/')
-    key_and_mouse_press=models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f'ScreenCapture {self.id}'
+    
+class KeyMousePress(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    log_id = models.ForeignKey(Logs, on_delete=models.CASCADE, related_name='key_mouse_press')
+    keyboardPress = models.CharField(max_length=255)
+    mouseClick = models.CharField(max_length=255)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'KeyMousePress {self.id}'
+    
