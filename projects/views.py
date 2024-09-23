@@ -12,6 +12,8 @@ from rest_framework import status
 import cloudinary.uploader
 from admins.services import UserService
 from datetime import datetime, time
+from collections import defaultdict
+
 
 class ProjectListCreateView(ListCreateAPIView):
     queryset = ProjectService.get_all_projects()
@@ -210,7 +212,7 @@ class ProjectScreenCaptureDetailView(DestroyAPIView):
     
 class ProjectLogsFilterView(CreateAPIView):
     queryset = ProjectService.get_all_projects()
-    serializer_class=LogCreateSerializer
+    serializer_class = LogCreateSerializer
 
     def post(self, request, *args, **kwargs):
         user_id = request.data.get('user_id')
@@ -241,8 +243,20 @@ class ProjectLogsFilterView(CreateAPIView):
             log['date'], log['start_time'] = convert_timestamp_iso8601(str(log['start_timestamp']), offset)
             if log['end_timestamp']:
                 log['end_time'] = convert_timestamp_iso8601(log['end_timestamp'], offset)[1]
-            filtered_logs.append(log)
+            grouped_images = defaultdict(list)
 
+            for image in log['images']:
+                # Parse datetime and truncate to minute precision, formatting as requested
+                dt = datetime.strptime(image['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                minute_group = dt.strftime('%Y-%m-%dT%H:%M:00.000000Z')
+                
+                # Add the image to the appropriate group
+                grouped_images[minute_group].append(image)
+
+            
+            log['images'] = grouped_images
+            filtered_logs.append(log)
+        
         return Response(filtered_logs, status=status.HTTP_200_OK)
     
 class ProjectsRemoveAPIView(CreateAPIView):
