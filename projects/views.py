@@ -151,6 +151,18 @@ class ProjectLogsDetailView(RetrieveUpdateDestroyAPIView):
                 log_data['end_time'] = convert_timestamp_iso8601(log_data['end_timestamp'],request.data.get('offset'))[1]
             else:
                 log_data['end_time'] = None
+
+            if "key_and_mouse_press" in request.data:
+                key_and_mouse_press_data = request.data.get('key_and_mouse_press')
+                for timestamp, data in key_and_mouse_press_data.items():
+                    data['created_at'] = timestamp 
+                    data['log_id'] = log.id
+                    key_mouse_press = KeyMousePressCreateSerializer(data=data)
+                    if key_mouse_press.is_valid():
+                        key_mouse_press.save()
+                        log.key_and_mouse_press.add(key_mouse_press.instance)
+                    else:
+                        return Response(key_mouse_press.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(log_data, status=status.HTTP_200_OK)
         return Response({'error': 'You are not authorized to edit this log'}, status=status.HTTP_400_BAD_REQUEST)
 
