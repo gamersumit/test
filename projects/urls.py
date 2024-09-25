@@ -10,6 +10,7 @@ urlpatterns = [
     path('users/logs/', ProjectLogsView.as_view(), name='log-create'),
     path('users/logs/filter/', ProjectLogsFilterView.as_view(), name='logs-filter'),
     path('users/logs/screencaptures/', ProjectScreenCaptureView.as_view(), name='screencapture'),
+    path('users/logs/screencaptures/hours/', ProjectScreenCaptureHoursFilterView.as_view(), name='screencapture-hours'),
     path('users/logs/<str:pk>/', ProjectLogsDetailView.as_view(), name='log-detail'),
     path('users/logs/screencaptures/<str:pk>/', ProjectScreenCaptureDetailView.as_view(), name='screencapture'),
     path('<str:pk>/', ProjectRetrieveUpdateDeleteView.as_view(), name='project-detail'),

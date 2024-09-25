@@ -13,6 +13,9 @@ import cloudinary.uploader
 from admins.services import UserService
 from datetime import datetime, time
 from collections import defaultdict
+from django.db.models import ExpressionWrapper, F, fields, Sum
+from datetime import timedelta
+
 
 
 class ProjectListCreateView(ListCreateAPIView):
@@ -315,3 +318,55 @@ class ProjectsRemoveAPIView(CreateAPIView):
         projects = ProjectSerializer(ProjectService.filter_project_by_user_id(user_id), many=True).data
         user_data['projects'] = projects
         return Response(user_data, status=status.HTTP_200_OK)
+
+class ProjectScreenCaptureHoursFilterView(CreateAPIView):
+    def post(self, request, *args, **kwargs):    
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        user_id = request.data.get('user_id')
+        project_id = request.data.get('project_id')
+        offset = int(request.data.get('offset', 0))
+
+        if not start_date or not end_date:
+            return Response({'error': 'Start and end date are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Apply offset to start_date and end_date
+        start_datetime = start_date + timedelta(minutes=offset)
+        end_datetime = end_date + timedelta(minutes=offset) + timedelta(hours=23, minutes=59)
+
+        # Filter logs by project_id, user_id, and the specified time range
+        logs = Logs.objects.filter(
+            project_id=project_id,
+            user_id=user_id,
+            start_timestamp__range=(start_datetime, end_datetime)
+        )
+
+        for log in logs.values():
+            print(log)
+            
+            
+                # Calculate total hours and minutes
+        logs = logs.annotate(
+            duration=ExpressionWrapper(
+                F('end_timestamp') - F('start_timestamp'),
+                output_field=fields.DurationField()
+            )
+        ).aggregate(total_duration=Sum('duration'))
+        
+        total_duration = logs['total_duration']
+        if total_duration:
+            total_seconds = total_duration.total_seconds()
+            total_hours = total_seconds // 3600
+            total_minutes = (total_seconds % 3600) // 60
+        else:
+            total_hours = 0
+            total_minutes = 0
+        
+        return Response({'total_hours': total_hours, 'total_minutes': total_minutes}, status=status.HTTP_200_OK)
+
