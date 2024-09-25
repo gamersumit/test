@@ -213,12 +213,18 @@ class ProjectScreenCaptureView(CreateAPIView):
         for timestamp, data in key_and_mouse_press_data.items():
             data['created_at'] = timestamp 
             data['log_id'] = log.id
-            key_mouse_press = KeyMousePressCreateSerializer(data=data)
-            if key_mouse_press.is_valid():
-                key_mouse_press.save()
-                log.key_and_mouse_press.add(key_mouse_press.instance)
+            if KeyMousePress.objects.filter(created_at=timestamp, log_id=log.id).exists():
+                data=KeyMousePress.objects.get(created_at=timestamp, log_id=log.id)
+                data.keyboardPress=int(data.keyboardPress)+int(key_and_mouse_press_data[timestamp]['keyboardPress'])
+                data.mouseClick=int(data.mouseClick)+int(key_and_mouse_press_data[timestamp]['mouseClick'])
+                data.save()
             else:
-                return Response(key_mouse_press.errors, status=status.HTTP_400_BAD_REQUEST)
+                key_mouse_press = KeyMousePressCreateSerializer(data=data)
+                if key_mouse_press.is_valid():
+                    key_mouse_press.save()
+                    log.key_and_mouse_press.add(key_mouse_press.instance)
+                else:
+                    return Response(key_mouse_press.errors, status=status.HTTP_400_BAD_REQUEST)
                 
         log_serializer = LogInstanceCreateSerializer(log)
         return Response(log_serializer.data, status=status.HTTP_201_CREATED)
