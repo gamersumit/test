@@ -273,7 +273,7 @@ class ProjectLogsFilterView(CreateAPIView):
             if log['end_timestamp']:
                 log['end_time'] = convert_timestamp_iso8601(log['end_timestamp'], offset)[1]
             grouped_images = defaultdict(list)
-            grouped_key_press = defaultdict(list)
+            grouped_key_press = {}
 
             for image in log['images']:
                 # Parse datetime and truncate to minute precision, formatting as requested
@@ -288,7 +288,7 @@ class ProjectLogsFilterView(CreateAPIView):
                 minute_group = dt.strftime('%Y-%m-%dT%H:%M:00.000000Z')
                 
                 # Add the image to the appropriate group
-                grouped_key_press[minute_group].append(key_press)
+                grouped_key_press[minute_group]=key_press
             log['key_and_mouse_press'] = grouped_key_press
 
             
