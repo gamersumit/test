@@ -287,14 +287,14 @@ class ProjectLogsFilterView(CreateAPIView):
             for image in log['images']:
                 # Parse datetime and truncate to minute precision, formatting as requested
                 dt = datetime.strptime(image['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                minute_group = dt.strftime('%Y-%m-%dT%H:%M:00.000000Z')
+                minute_group = dt.strftime('%Y-%m-%dT%H:%M:%S.000000Z')
                 
                 # Add the image to the appropriate group
                 grouped_images[minute_group].append(image)
             for key_press in log['key_and_mouse_press']:
                 # Parse datetime and truncate to minute precision, formatting as requested
                 dt = datetime.strptime(key_press['created_at'], '%Y-%m-%dT%H:%M:%SZ')                
-                minute_group = dt.strftime('%Y-%m-%dT%H:%M:00.000000Z')
+                minute_group = dt.strftime('%Y-%m-%dT%H:%M:%S.000000Z')
                 
                 # Add the image to the appropriate group
                 grouped_key_press[minute_group]=key_press
