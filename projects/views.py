@@ -272,7 +272,7 @@ class ProjectLogsFilterView(CreateAPIView):
         end_datetime = datetime.combine(date, time(12, 0))   # 12:00 PM
 
         # Filter logs by project_id, user_id, and the specified time range
-        logs = LogService.filter_logs_by_project_id_and_user_id(project_id, user_id)
+        logs = LogService.filter_logs_by_project_id_and_user_id(project_id, user_id).order_by('start_timestamp')
         logs = logs.filter(start_timestamp__range=(start_datetime, end_datetime))
 
         serializer = LogSerializer(logs, many=True)
