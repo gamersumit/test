@@ -40,14 +40,17 @@ class AdminLoginView(CreateAPIView):
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
-        admin = AdminService.get_admin_by_email(request.data['email'])
-        if admin.is_admin==False and request.data['login_type'] == 'admin':
-            return Response({'error': 'Not an admin'}, status=status.HTTP_400_BAD_REQUEST)
-        admin_data = AdminSerializer(admin).data
-        if check_password(request.data['password'], admin.password):
-            admin_token=create_admin_token(admin)
-            return Response({"access_token":f"{admin_token['access_token']}","refresh_token":f"{admin_token['refresh_token']}","data":admin_data}, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            admin = AdminService.get_admin_by_email(request.data['email'])
+            if admin.is_admin==False and request.data['login_type'] == 'admin':
+                return Response({'error': 'Not an admin'}, status=status.HTTP_400_BAD_REQUEST)
+            admin_data = AdminSerializer(admin).data
+            if check_password(request.data['password'], admin.password):
+                admin_token=create_admin_token(admin)
+                return Response({"access_token":f"{admin_token['access_token']}","refresh_token":f"{admin_token['refresh_token']}","data":admin_data}, status=status.HTTP_200_OK)
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
 class GoogleOauthView(CreateAPIView):
     queryset = AdminService.get_all_admins()
@@ -180,7 +183,7 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         id=kwargs['pk']
         user = UserService.get_user(id)
-        if user.is_admin==False:
+        if user.is_admin==True:
             return Response({'error': 'You are not authorized to delete this user'}, status=status.HTTP_400_BAD_REQUEST)
         return super().delete(request, *args, **kwargs)
 
