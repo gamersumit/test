@@ -151,9 +151,12 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         id=kwargs['pk']
         user = UserService.get_user(id)
-        # print(user.is_admin)
-        # if user.is_admin==False:
-        #     return Response({'error': 'You are not authorized to update this user'}, status=status.HTTP_400_BAD_REQUEST)
+        auth_header = request.headers.get('Authorization')
+        token = auth_header.split(' ')[1]
+        admin_id = decode_access_token(token).get('user_id')
+        admin=UserService.get_user(admin_id)
+        if admin.is_admin==False:
+            return Response({'error': 'You are not authorized to update this user'}, status=status.HTTP_400_BAD_REQUEST)
         data= super().put(request, *args, **kwargs)
 
         users_project=ProjectService.filter_project_by_user_id(id)
