@@ -42,8 +42,8 @@ class AdminLoginView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             admin = AdminService.get_admin_by_email(request.data['email'])
-            if admin.is_admin==False and request.data['login_type'] == 'admin':
-                return Response({'error': 'Not an admin'}, status=status.HTTP_400_BAD_REQUEST)
+            # if admin.is_admin==False and request.data['login_type'] == 'admin':
+            #     return Response({'error': 'Not an admin'}, status=status.HTTP_400_BAD_REQUEST)
             admin_data = AdminSerializer(admin).data
             if check_password(request.data['password'], admin.password):
                 admin_token=create_admin_token(admin)
@@ -51,6 +51,8 @@ class AdminLoginView(CreateAPIView):
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({'error': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': e}, status=status.HTTP_400_BAD_REQUEST)
 
 class GoogleOauthView(CreateAPIView):
     queryset = AdminService.get_all_admins()
@@ -149,8 +151,9 @@ class UserRetrieveUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         id=kwargs['pk']
         user = UserService.get_user(id)
-        if user.is_admin==False:
-            return Response({'error': 'You are not authorized to update this user'}, status=status.HTTP_400_BAD_REQUEST)
+        # print(user.is_admin)
+        # if user.is_admin==False:
+        #     return Response({'error': 'You are not authorized to update this user'}, status=status.HTTP_400_BAD_REQUEST)
         data= super().put(request, *args, **kwargs)
 
         users_project=ProjectService.filter_project_by_user_id(id)
